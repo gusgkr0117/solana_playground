@@ -11,7 +11,7 @@ playground = "GyZhiCQ6RVaUdK5cdehQYRstHBiX2Tf2YsjAiPLBbk6V"
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Localnet"
+cluster = "Devnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
