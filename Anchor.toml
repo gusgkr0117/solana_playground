@@ -5,13 +5,15 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-playground = "GyZhiCQ6RVaUdK5cdehQYRstHBiX2Tf2YsjAiPLBbk6V"
+playground = "BVynmyfz1nEjVr8825CwADZxQoXnnesN8ujhyHDqvUy8"
 
 [registry]
-url = "https://api.apr.dev"
+# url = "https://api.apr.dev"
+url = "http://127.0.0.1:8899"
 
 [provider]
-cluster = "Devnet"
+# cluster = "Devnet"
+cluster = "Localnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]

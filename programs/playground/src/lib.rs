@@ -11,10 +11,10 @@ use anchor_spl::{
 };
 
 
-declare_id!("GyZhiCQ6RVaUdK5cdehQYRstHBiX2Tf2YsjAiPLBbk6V");
+declare_id!("BVynmyfz1nEjVr8825CwADZxQoXnnesN8ujhyHDqvUy8");
 
 #[program]
-mod token_minter {
+mod playground {
     use super::*;
     pub fn init_token(ctx: Context<InitToken>, metadata: InitTokenParams) -> Result<()> {
         let seeds = &["mint".as_bytes(), &[ctx.bumps.mint]];
