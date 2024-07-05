@@ -3,6 +3,17 @@
 + Rust, Nodejs must be installed
 + Solana-cli, anchor-cli must be installed
 
+## Configuration
+1. use solana devnet
+```bash
+solana config set --url https://api.devnet.solana.com
+```
+
+2. request an airdrop
+```bash
+solana airdrop 2
+```
+
 ## How-to-use
 1. build the program
 ```bash
@@ -26,10 +37,10 @@ anchor run client
 
 getting following output
 ```bash
-playground git:(main) anchor run client
 yarn run v1.22.22
 ...
-32b9eDPHvvD4fDSgCmtr37Ex4JDuvYcpojzBWwpHSFbBU8hc5LrLGiPNpVc7RC4H3tuZAwE9qeuHKJRP9TX6GS89
+3D7oHtDZFnq34no45BK5qT961ntRHZUszRGLAq48Q3z5PJCpa9uXUkS1d5rNLnZLXMpnGVqVcr8pN9Nmv9zZRJpa
+65LJiSf45tMw9ahTBv3T9ZWxwgGAkzbvHeHkMJjxCu1eWnYfaws1ENULiJxqiUziY1Qr7xnRoMDwanQFWVCr6wrb
 DONE
-✨  Done in 1.73s.
+✨  Done in 4.89s.
 ```
