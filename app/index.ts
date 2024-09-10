@@ -5,6 +5,7 @@ import * as web3 from "@solana/web3.js";
 
 const METADATA_SEED = "metadata";
 const MINT_SEED = "mint";
+const STAKE_SEED = "stake";
 const TOKEN_METADATA_PROGRAM_ID = new web3.PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s");
 
 async function init_mint(program, mint, payer) {
@@ -39,7 +40,7 @@ async function init_mint(program, mint, payer) {
     return txHash;
 }
 
-async function mint_token(program, mint, payer) {
+async function mint_token(program, mint, stakeAccount, payer) {
     const destination = await anchor.utils.token.associatedAddress({
         mint: mint,
         owner: payer,
@@ -48,6 +49,7 @@ async function mint_token(program, mint, payer) {
     const context = {
         mint,
         destination,
+        stakeAccount,
         payer,
         rent: web3.SYSVAR_RENT_PUBKEY,
         systemProgram: web3.SystemProgram.programId,
@@ -71,9 +73,14 @@ async function main() {
         program.programId
     );
 
-    const txHash1 = await init_mint(program, mint, payer);
-    const txHash2 = await mint_token(program, mint, payer);
-    console.log(txHash1);
+    const [stake_account] = web3.PublicKey.findProgramAddressSync(
+        [Buffer.from(STAKE_SEED)],
+        program.programId
+    );
+
+    // const txHash1 = await init_mint(program, mint, payer);
+    // console.log(txHash1);
+    const txHash2 = await mint_token(program, mint, stake_account, payer);
     console.log(txHash2);
 }
 

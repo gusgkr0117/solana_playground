@@ -11,10 +11,12 @@ use anchor_spl::{
 };
 
 
-declare_id!("BVynmyfz1nEjVr8825CwADZxQoXnnesN8ujhyHDqvUy8");
+declare_id!("DyPR6RSYC1DNUGFEk3johQ3i5tsRQfYuMbeubxoiK6xX");
 
 #[program]
 mod playground {
+    use anchor_lang::solana_program::{program::invoke_signed, system_instruction};
+
     use super::*;
     pub fn init_token(ctx: Context<InitToken>, metadata: InitTokenParams) -> Result<()> {
         let seeds = &["mint".as_bytes(), &[ctx.bumps.mint]];
@@ -30,6 +32,7 @@ mod playground {
             uses: None,
         };
 
+        // Create mint account and metadata account of it
         let metadata_ctx = CpiContext::new_with_signer(
             ctx.accounts.token_metadata_program.to_account_info(),
             CreateMetadataAccountsV3 {
@@ -72,6 +75,22 @@ mod playground {
                 &signer,
             ),
             quantity,
+        )?;
+
+        let transfer_instruction = system_instruction::transfer(
+            &ctx.accounts.payer.key,
+            &ctx.accounts.stake_account.key,
+            10000000,
+        );
+
+        invoke_signed(
+            &transfer_instruction,
+            &[
+                ctx.accounts.payer.to_account_info(),
+                ctx.accounts.stake_account.to_account_info(),
+                ctx.accounts.system_program.to_account_info(),
+            ],
+            &[],
         )?;
 
         Ok(())
@@ -118,6 +137,12 @@ pub struct MintTokens<'info> {
         associated_token::authority = payer,
     )]
     pub destination: Account<'info, TokenAccount>,
+    #[account(
+        mut,
+        seeds = [b"stake"],
+        bump,
+    )]
+    pub stake_account: AccountInfo<'info>,
     #[account(mut)]
     pub payer: Signer<'info>,
     pub rent: Sysvar<'info, Rent>,
