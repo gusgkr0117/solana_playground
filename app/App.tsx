@@ -14,6 +14,7 @@ import ReactDOM from "react-dom";
 import '@solana/wallet-adapter-react-ui/styles.css';
 import { AccountState } from "./components/AccountState";
 import MintNFT from "./components/MintNFT";
+import GetRandom from "./components/GetRandom";
 
 export const App: FC = () => {
   const network = WalletAdapterNetwork.Devnet;
@@ -38,6 +39,7 @@ export const App: FC = () => {
             <div className="m-4 space-y-4 text-sky-400">
               <AccountState />
               <MintNFT/>
+              <GetRandom/>
             </div>
           </div>
           <div className="text-center text-sky-400 h-16 -translate-y-full p-4 content-center items-center relative bg-blue-900">
