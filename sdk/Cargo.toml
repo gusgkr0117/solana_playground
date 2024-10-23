@@ -1,0 +1,36 @@
+[package]
+name = "orao-solana-vrf"
+version = "0.4.0"
+edition = "2021"
+authors = ["ORAO Devs <hello@orao.network>"]
+homepage = "https://orao.network"
+repository = "https://github.com/orao-network/solana-vrf"
+license = "Apache-2.0"
+keywords = ["solana", "vrf", "ed25519", "anchor"]
+description = "ORAO Verifiable Random Function for Solana."
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+sdk = ["no-entrypoint", "anchor-client", "ed25519-dalek", "tokio", "thiserror"]
+default = ["sdk"]
+
+[dependencies]
+anchor-lang = "0.30.1"
+anchor-spl = "0.30.1"
+anchor-client = { version = "0.30.1", optional=true, features=["async"] }
+ed25519-dalek = { version = "1.0.1", optional=true }
+tokio = { version = "1", optional = true }
+thiserror = { version = "1", optional = true }
+
+[dev-dependencies]
+byteorder = "1.4.3"
+solana-cli-config = { version = "1.18" }
+rand = { version = "0.8" }
+anchor-client = { version="0.30.1", features = ["debug"] }
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]

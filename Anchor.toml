@@ -4,16 +4,16 @@
 resolution = true
 skip-lint = false
 
-[programs.localnet]
-playground = "GyZhiCQ6RVaUdK5cdehQYRstHBiX2Tf2YsjAiPLBbk6V"
+[programs.devnet]
+playground = "5WfZSgzTsDGQzBsfH7EyKZWNtKC5xuWTfLK8RNnw2nMP"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Localnet"
+cluster = "Devnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
-client = "yarn run ts-node app/index.ts"
+client = "yarn run dev"
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"

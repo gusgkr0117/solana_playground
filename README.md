@@ -1,6 +1,7 @@
 # Playground for use of Anchor and Solana program
 ## Requirements
 + Rust, Nodejs must be installed
+    + yarn installed(npm install --global yarn)
 + Solana-cli, anchor-cli must be installed
 
 ## How-to-use
