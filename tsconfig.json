@@ -10,5 +10,6 @@
     "emitDeclarationOnly": true,
     "isolatedModules": true,
     "jsx":"react",
+    "resolveJsonModule": true,
   }
 }

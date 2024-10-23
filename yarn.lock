@@ -1548,6 +1548,13 @@
     "@metaplex-foundation/umi-serializers-encodings" "^0.8.9"
     "@metaplex-foundation/umi-serializers-numbers" "^0.8.9"
 
+"@metaplex-foundation/umi-signer-wallet-adapters@^0.9.2":
+  version "0.9.2"
+  resolved "https://registry.yarnpkg.com/@metaplex-foundation/umi-signer-wallet-adapters/-/umi-signer-wallet-adapters-0.9.2.tgz#db531b11bdf64af1b93ddbd27d9cd5c019013115"
+  integrity sha512-DFG0ZFocKG8briypSkG9bGUTVsWpAgYugsl2BzTygkGExc4evWfF4Sb1F2C2w9FdrA9ESZM1gpLX9xtx5taOXg==
+  dependencies:
+    "@metaplex-foundation/umi-web3js-adapters" "^0.9.2"
+
 "@metaplex-foundation/umi-transaction-factory-web3js@^0.9.2":
   version "0.9.2"
   resolved "https://registry.yarnpkg.com/@metaplex-foundation/umi-transaction-factory-web3js/-/umi-transaction-factory-web3js-0.9.2.tgz#294c3ca996897bb95b993b808fb9252bd085db15"
@@ -5285,6 +5292,11 @@ flat@^5.0.2:
   version "5.0.2"
   resolved "https://registry.npmjs.org/flat/-/flat-5.0.2.tgz"
   integrity sha512-b6suED+5/3rTpUBdG1gupIl8MPFCAMA0QXwmljLhvCUKcUvdE4gWky9zpuGCcXHOsz4J9wPGNWq6OKpmIzz3hQ==
+
+flowbite-react-icons@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/flowbite-react-icons/-/flowbite-react-icons-1.1.0.tgz#170e18b4efc86847e52e7323311e823d5ec1e63b"
+  integrity sha512-wCBIStVygQ+CQlErY7s28vbXBRz3d6iqaSEdkSjtZb66lrV0uDs2NfUA2mWuIVhHUEC/CDktyUL0DG3J2gt/WQ==
 
 follow-redirects@^1.0.0:
   version "1.15.9"

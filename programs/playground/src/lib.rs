@@ -7,15 +7,16 @@ use mpl_core::{
     instructions::{AddPluginV1Builder, CreateV2CpiBuilder},
     types::{Plugin, ImmutableMetadata, PluginAuthority}, 
 };
-use orao_solana_vrf::{program::OraoVrf, state::NetworkState, CONFIG_ACCOUNT_SEED, RANDOMNESS_ACCOUNT_SEED};
-use state::ProgramConfig;
+use orao_solana_vrf::{program::OraoVrf, state::{NetworkState, RandomnessV2, randomness_v2::Request}, CONFIG_ACCOUNT_SEED, RANDOMNESS_ACCOUNT_SEED};
+use state::{ RandomState, ProgramConfig};
 
-declare_id!("DyPR6RSYC1DNUGFEk3johQ3i5tsRQfYuMbeubxoiK6xX");
+declare_id!("5WfZSgzTsDGQzBsfH7EyKZWNtKC5xuWTfLK8RNnw2nMP");
 
 #[derive(AnchorDeserialize, AnchorSerialize)]
 pub struct CreateAssetArgs {
     name: String,
     uri: String,
+    numbers: [u8; 6],
 }
 
 #[program]
@@ -25,7 +26,7 @@ pub mod playground {
 
     use super::*;
 
-    pub fn intialize(ctx: Context<Initialize>) -> Result<()> {
+    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
         let program_config = &mut ctx.accounts.program_config;
         **program_config = ProgramConfig::new();
 
@@ -52,6 +53,11 @@ pub mod playground {
             Some(update_authority) => Some(update_authority.to_account_info()),
             None => None,
         };
+
+        let program_config = &ctx.accounts.program_config;
+        if program_config.state != RandomState::Finished {
+            return Err(Error::NotSettled.into());
+        }
             
         CreateV2CpiBuilder::new(&ctx.accounts.mpl_core_program.to_account_info())
             .asset(&ctx.accounts.asset.to_account_info())
@@ -69,7 +75,11 @@ pub mod playground {
                         attribute_list: vec![
                             Attribute {
                                 key: "numbers".to_string(),
-                                value: "1234".to_string(),
+                                value: args.numbers.map(|v| v.to_string()).join(","),
+                            },
+                            Attribute {
+                                key: "round".to_string(),
+                                value: program_config.round.to_string(),
                             }
                         ]
                     }),
@@ -95,6 +105,15 @@ pub mod playground {
     }
 
     pub fn get_random_number(ctx: Context<GetRandomNumber>, force: [u8;32]) -> Result<()> {
+        let program_config = &mut ctx.accounts.program_config;
+
+        if program_config.state == RandomState::Requested {
+            return Err(Error::DoubleRequest.into());
+        }
+
+        if program_config.prev_force == force {
+            return Err(Error::SameSeedUsed.into());
+        }
         // Zero seed is illegal in VRF
         if force == [0_u8; 32] {
             return Err(Error::YouMustSpinTheCylinder.into());
@@ -112,15 +131,43 @@ pub mod playground {
 
         let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
         orao_solana_vrf::cpi::request_v2(cpi_ctx, force)?;
+
+        program_config.state = RandomState::Requested;
+        program_config.prev_force = force;
         
+        Ok(())
+    }
+
+    pub fn settle_random(ctx:Context<SettleRandom>, force: [u8;32]) -> Result<()> {
+        let randomness_account = &ctx.accounts.random;
+        let program_config = &mut ctx.accounts.program_config;
+
+        if program_config.state != RandomState::Requested {
+            return Err(Error::NotRequestedYet.into());
+        }
+
+        if program_config.prev_force != force {
+            return Err(Error::IncorrectSeedRequested.into());
+        }
+
+        match randomness_account.request.clone() {
+            Request::Fulfilled(x) => {
+                program_config.numbers = x.randomness;
+                program_config.state = RandomState::Finished;
+                program_config.round += 1;
+            },
+            Request::Pending(_) => {
+                return Err(Error::PendingRandom.into());
+            },
+        }
         Ok(())
     }
 }
 
 #[derive(Accounts)]
-pub struct Initalize<'info> {
+pub struct Initialize<'info> {
     #[account(mut)]
-    pub payer: Singer<'info>,
+    pub payer: Signer<'info>,
     #[account(
         init_if_needed,
         seeds = [b"config"],
@@ -148,6 +195,11 @@ pub struct CreateAsset<'info> {
         bump,
     )]
     pub creator: AccountInfo<'info>,
+    #[account(
+        seeds=[b"config"],
+        bump,
+    )]
+    pub program_config: Account<'info, ProgramConfig>,
     /// CHECK: this account will be checked by the mpl_core program
     pub owner: Option<UncheckedAccount<'info>>,
     /// CHECK: this account will be checked by the mpl_core program
@@ -198,14 +250,42 @@ pub struct GetRandomNumber<'info> {
     pub system_program: Program<'info, System>,
 }
 
+#[derive(Accounts)]
+#[instruction(force: [u8; 32])]
+pub struct SettleRandom<'info> {
+    #[account(mut)]
+    pub payer : Signer<'info>,
+    #[account(
+        mut,
+        seeds = [b"config"],
+        bump
+    )]
+    pub program_config: Account<'info, ProgramConfig>,
+    /// This account is the current VRF request account, it'll be the `request` account in the CPI call.
+    /// CHECK:
+    #[account(
+        mut,
+        seeds = [RANDOMNESS_ACCOUNT_SEED, &force],
+        bump,
+        seeds::program = orao_solana_vrf::ID
+    )]
+    pub random: Account<'info, RandomnessV2>,
+}
+
 #[error_code]
 pub enum Error {
-    #[msg("The player is already dead")]
-    PlayerDead,
-    #[msg("Unable to serialize a randomness request")]
-    RandomnessRequestSerializationError,
+    #[msg("previous round not finished")]
+    NotSettled,
+    #[msg("random value already requested")]
+    DoubleRequest,
+    #[msg("random value must be requested")]
+    NotRequestedYet,
+    #[msg("seed cannot be used repetitively")]
+    SameSeedUsed,
+    #[msg("seed not correct")]
+    IncorrectSeedRequested,
     #[msg("Player must spin the cylinder")]
     YouMustSpinTheCylinder,
-    #[msg("The cylinder is still spinning")]
-    TheCylinderIsStillSpinning,
+    #[msg("orao random account still pending")]
+    PendingRandom,
 }
